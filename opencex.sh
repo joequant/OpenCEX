@@ -1,11 +1,34 @@
 #!/bin/bash
 
+while test $# -gt 0
+do
+    case "$1" in
+        --batch) echo "Batch mode"
+		 MODE=batch
+            ;;
+    esac
+    shift
+done
+
+prompt() {
+    if [ "$MODE" != "batch" ] ; then
+	read -p "$1"
+    fi
+}
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+if [[ -z "${APP_DEPLOY}" ]]; then
+    APP_DEPLOY=$SCRIPT_DIR
+fi
 
 mkdir /app/opencex -p
 cd /app/opencex || exit
-git clone https://github.com/Polygant/OpenCEX-backend.git ./backend
-git clone https://github.com/Polygant/OpenCEX-frontend.git ./frontend
-git clone https://github.com/Polygant/OpenCEX-static.git ./nuxt
+GITHUB_ROOT="${GITHUB_ROOT:-Polygant}"
+
+git clone https://github.com/${GITHUB_ROOT}/OpenCEX-backend.git ./backend
+git clone https://github.com/${GITHUB_ROOT}/OpenCEX-frontend.git ./frontend
+git clone https://github.com/${GITHUB_ROOT}/OpenCEX-static.git ./nuxt
 
 
 echo "`cat <<YOLLOPUKKI
@@ -32,7 +55,7 @@ to re-enter the parameters.
 		  
 YOLLOPUKKI`"
 
-read -p "Press enter to continue"
+prompt "Press enter to continue"
 
 cd /app/opencex/backend || exit
 FILE=/app/opencex/backend/.env
@@ -496,9 +519,9 @@ fi
 
 # build front
 mkdir -p /app/opencex/frontend/deploy/
-cp /app/deploy/frontend/Dockerfile /app/opencex/frontend/deploy/Dockerfile
-cp /app/deploy/frontend/default.conf /app/opencex/frontend/deploy/default.conf
-cp /app/deploy/frontend/nginx.conf /app/opencex/frontend/deploy/nginx.conf
+cp ${APP_DEPLOY}/frontend/Dockerfile /app/opencex/frontend/deploy/Dockerfile
+cp ${APP_DEPLOY}/frontend/default.conf /app/opencex/frontend/deploy/default.conf
+cp ${APP_DEPLOY}/frontend/nginx.conf /app/opencex/frontend/deploy/nginx.conf
 sed -i "s/ADMIN_BASE_URL/$ADMIN_BASE_URL/g" /app/opencex/frontend/deploy/default.conf
 sed -i "s/DOMAIN/$DOMAIN/g" /app/opencex/frontend/deploy/default.conf
 docker build -t frontend -f deploy/Dockerfile .
@@ -506,8 +529,8 @@ docker build -t frontend -f deploy/Dockerfile .
 # build nuxt
 mkdir -p /app/opencex/nuxt/deploy/
 cd /app/opencex/nuxt || exit
-cp /app/deploy/nuxt/.env.template /app/opencex/nuxt/
-cp /app/deploy/nuxt/Dockerfile /app/opencex/nuxt/deploy/Dockerfile
+cp ${APP_DEPLOY}/nuxt/.env.template /app/opencex/nuxt/
+cp ${APP_DEPLOY}/nuxt/Dockerfile /app/opencex/nuxt/deploy/Dockerfile
 envsubst < /app/opencex/nuxt/.env.template > /app/opencex/nuxt/.env
 docker build -t nuxt -f deploy/Dockerfile .
 
@@ -728,18 +751,18 @@ networks:
     external: true
 EOF
 
-docker compose up -d
+docker-compose up -d
 
 docker stop opencexcel opencexwss
 sleep 5;
 docker exec -it opencex python ./manage.py migrate
 docker exec -it opencex python ./manage.py collectstatic
-docker compose up -d
+docker-compose up -d
 
 
 
 cd /app/opencex || exit
-docker compose stop
+docker-compose stop
 cat << EOF > /app/opencex/bitcoind_data/bitcoin.conf
 rpcuser=$BTC_NODE_USER
 rpcpassword=$BTC_NODE_PASS
@@ -750,19 +773,19 @@ prune=20000
 wallet=/bitcoin/.bitcoin/opencex
 
 EOF
-docker compose up -d
+docker-compose up -d
 sleep 30;
 docker exec -it bitcoind bitcoin-cli -named createwallet wallet_name="opencex" descriptors=false
 docker restart bitcoind
 sleep 30;
 docker exec -it opencex python wizard.py
 cd /app/opencex || exit
-docker compose stop
-docker compose up -d
+docker-compose stop
+docker-compose up -d
 
 
 
 # cleanup
-# cd /app/opencex && docker compose down
+# cd /app/opencex && docker-compose down
 # rm -rf /app
 # docker system prune -a
