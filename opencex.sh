@@ -308,18 +308,18 @@ networks:
     external: true
 EOF
 
-docker compose up -d
+docker-compose up -d
 
 docker stop opencexcel opencexwss
 sleep 5;
 docker exec -it opencex python ./manage.py migrate
 docker exec -it opencex python ./manage.py collectstatic
-docker compose up -d
+docker-compose up -d
 
 
 
 cd /app/opencex || exit
-docker compose stop
+docker-compose stop
 cat << EOF > /app/opencex/bitcoind_data/bitcoin.conf
 rpcuser=$BTC_NODE_USER
 rpcpassword=$BTC_NODE_PASS
@@ -330,19 +330,19 @@ prune=20000
 wallet=/bitcoin/.bitcoin/opencex
 
 EOF
-docker compose up -d
+docker-compose up -d
 sleep 30;
 docker exec -it bitcoind bitcoin-cli -named createwallet wallet_name="opencex" descriptors=false
 docker restart bitcoind
 sleep 30;
 docker exec -it opencex python wizard.py
 cd /app/opencex || exit
-docker compose stop
-docker compose up -d
+docker-compose stop
+docker-compose up -d
 
 
 
 # cleanup
-# cd /app/opencex && docker compose down
+# cd /app/opencex && docker-compose down
 # rm -rf /app
 # docker system prune -a
