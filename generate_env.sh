@@ -423,5 +423,9 @@ export CRYPTO_KEY
 BOT_PASSWORD=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-12};echo;)
 export BOT_PASSWORD
 
+if [ -f $SCRIPT_DIR/config.env ] ; then
+   echo "Move file to $SCRIPT_DIR/config.env.bak"
+   mv -f $SCRIPT_DIR/config.env $SCRIPT_DIR/config.env.bak
+fi
 envsubst < /app/opencex/backend/.env.template > $SCRIPT_DIR/config.env
 echo "Environment file created at $SCRIPT_DIR/config.env"
