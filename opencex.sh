@@ -35,6 +35,10 @@ YOLLOPUKKI`"
 read -p "Press enter to continue"
 
 cd /app/opencex/backend || exit
+if test -f $SCRIPT_DIR/config.env ; then
+cp $SCRIPT_DIR/config.env /app/opencex/backend/.env
+fi
+
 FILE=/app/opencex/backend/.env
 if test ! -f "$FILE"; then
 source $SCRIPT_DIR/generate_env.sh
