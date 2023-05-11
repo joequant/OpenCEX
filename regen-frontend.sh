@@ -22,4 +22,13 @@ cp /app/deploy/nuxt/Dockerfile /app/opencex/nuxt/deploy/Dockerfile
 envsubst < /app/opencex/nuxt/.env.template > /app/opencex/nuxt/.env
 docker build -t nuxt -f deploy/Dockerfile .  --no-cache
 
+# build admin
+mkdir -p /app/opencex/admin/deploy/
+cd /app/opencex/admin || exit
+cp /app/deploy/admin/Dockerfile /app/opencex/admin/deploy/Dockerfile
+cp /app/deploy/admin/default.conf /app/opencex/admin/deploy/default.conf
+cp /app/deploy/admin/.env.template /app/opencex/admin/
+sed -i "s/ADMIN_BASE_URL/$ADMIN_BASE_URL/g" /app/opencex/admin/deploy/default.conf
+envsubst < /app/opencex/admin/.env.template > /app/opencex/admin/src/local_config.js
+docker build -t admin -f deploy/Dockerfile .
 
