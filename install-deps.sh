@@ -15,8 +15,8 @@ fi
 
 mkdir /app/opencex -p
 cd /app/opencex || exit
-git clone https://github.com/Polygant/OpenCEX-backend.git ./backend
-git clone https://github.com/Polygant/OpenCEX-frontend.git ./frontend
-git clone https://github.com/Polygant/OpenCEX-static.git ./nuxt
-git clone https://github.com/Polygant/OpenCEX-JS-admin.git ./admin
+git clone https://github.com/joequant/OpenCEX-backend.git --single-branch --branch production-bitquant ./backend
+git clone https://github.com/joequant/OpenCEX-frontend.git --single-branch --branch production-bitquant ./frontend
+git clone https://github.com/joequant/OpenCEX-static.git --single-branch --branch production-bitquant ./nuxt
+git clone https://github.com/joequant/OpenCEX-JS-admin.git --single-branch --branch production-bitquant ./admin
 
