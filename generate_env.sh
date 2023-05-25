@@ -586,7 +586,6 @@ if [ -f $SCRIPT_DIR/config.env ] ; then
 fi
 
 envsubst < /app/opencex/backend/.env.template > /app/opencex/backend/.env
-cp /app/opencex/backend/.env $SCRIPT_DIR/config.env
 
 ### save to env
 cat << EOF >> /app/opencex/backend/.env
@@ -599,3 +598,5 @@ FACEBOOK=$FACEBOOK
 TWITTER=$TWITTER
 LINKEDIN=$LINKEDIN
 EOF
+
+cp /app/opencex/backend/.env $SCRIPT_DIR/config.env
