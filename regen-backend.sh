@@ -10,4 +10,5 @@ set +a
 cd /app/opencex/backend/ || exit
 chmod +x /app/opencex/backend/manage.py
 docker build -t opencex . --no-cache
-
+echo "Remember to run"
+echo "docker compose run -it opencex python manage.py migrate" 
